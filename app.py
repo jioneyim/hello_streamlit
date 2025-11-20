@@ -2,7 +2,7 @@ import streamlit as st
 import duckdb
 import time
 
-DB_NAME = "madang.duckdb"   # DB 확장자 주의!
+DB_NAME = "madang.db"   # DB 확장자 주의!
 
 # DB 연결
 def connect():
@@ -90,6 +90,7 @@ if custid:
         except Exception as e:
             tab2.error(f"오류 발생: {e}")
 
+
 # ===========================
 # 3) 신규 고객 등록 (새로운 기능 추가)
 # ===========================
@@ -114,6 +115,6 @@ if tab3.button("고객 등록"):
         conn = connect()
         conn.sql(insert_customer_sql)
         conn.close()
-        tab3.success(f"신규 고객 등록 완료 (custid: {new_custid})")
+        tab3.success(f"신규 고객 등록 완료! (custid: {new_custid})")
     except Exception as e:
         tab3.error(f"오류 발생: {e}")
