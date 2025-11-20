@@ -90,31 +90,3 @@ if custid:
         except Exception as e:
             tab2.error(f"오류 발생: {e}")
 
-
-# ===========================
-# 3) 신규 고객 등록 (새로운 기능 추가)
-# ===========================
-tab3.subheader("신규 고객 등록")
-
-new_name = tab3.text_input("이름")
-new_addr = tab3.text_input("주소")
-new_phone = tab3.text_input("전화번호")
-
-if tab3.button("고객 등록"):
-
-    # 새로운 고객번호 생성
-    max_cust = query("SELECT COALESCE(MAX(custid), 0) FROM Customer", "scalar")
-    new_custid = (max_cust or 0) + 1
-
-    insert_customer_sql = f"""
-        INSERT INTO Customer (custid, name, address, phone)
-        VALUES ({new_custid}, '{new_name}', '{new_addr}', '{new_phone}');
-    """
-
-    try:
-        conn = connect()
-        conn.sql(insert_customer_sql)
-        conn.close()
-        tab3.success(f"신규 고객 등록 완료 (custid: {new_custid})")
-    except Exception as e:
-        tab3.error(f"오류 발생: {e}")
