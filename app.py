@@ -2,11 +2,12 @@ import streamlit as st
 import duckdb
 import time
 
-DB_NAME = "madang.db"   # DB 확장자 주의!
+DB_NAME = "madang.db"
 
 # DB 연결
 def connect():
     return duckdb.connect(DB_NAME)
+
 
 # SQL 실행 함수
 def query(sql, return_type="relation"):
@@ -27,8 +28,7 @@ def query(sql, return_type="relation"):
 # ------------------------------------
 st.title("📚 마당 DB (DuckDB 버전)")
 
-tab1, tab2, tab3 = st.tabs(["고객조회", "거래 입력", "신규 고객 등록"])
-
+tab1, tab2 = st.tabs(["고객조회", "거래 입력"])
 
 # ===========================
 # 1) 고객 조회
@@ -54,9 +54,8 @@ if name:
         tab2.write(f"📌 고객번호: {custid}")
         tab2.write(f"📌 고객명: {name}")
 
-
 # ===========================
-# 2) 거래 입력 (기존 기능)
+# 2) 거래 입력
 # ===========================
 if custid:
 
@@ -91,30 +90,32 @@ if custid:
             tab2.error(f"오류 발생: {e}")
 
 
-# ===========================
-# 3) 신규 고객 등록 (새로운 기능 추가)
-# ===========================
-tab3.subheader("신규 고객 등록")
+tab3 = st.tabs(["신규 고객 등록"])[0]
+tab3.subheader("🆕 신규 고객 등록")
 
-new_name = tab3.text_input("이름")
-new_addr = tab3.text_input("주소")
-new_phone = tab3.text_input("전화번호")
+new_name = tab3.text_input("이름 입력")
+new_addr = tab3.text_input("주소 입력")
+new_phone = tab3.text_input("전화번호 입력")
 
 if tab3.button("고객 등록"):
 
-    # 새로운 고객번호 생성
-    max_cust = query("SELECT COALESCE(MAX(custid), 0) FROM Customer", "scalar")
-    new_custid = (max_cust or 0) + 1
+    # 새로운 고객번호 자동 증가
+    try:
+        max_custid = query("SELECT COALESCE(MAX(custid), 0) FROM Customer", "scalar")
+        new_custid = (max_custid or 0) + 1
+    except:
+        tab3.error("Customer 테이블을 찾을 수 없습니다.")
+        st.stop()
 
-    insert_customer_sql = f"""
+    insert_sql = f"""
         INSERT INTO Customer (custid, name, address, phone)
         VALUES ({new_custid}, '{new_name}', '{new_addr}', '{new_phone}');
     """
 
     try:
         conn = connect()
-        conn.sql(insert_customer_sql)
+        conn.sql(insert_sql)
         conn.close()
-        tab3.success(f"신규 고객 등록 완료! (custid: {new_custid})")
+        tab3.success(f"신규 고객 등록 완료 (custid = {new_custid})")
     except Exception as e:
         tab3.error(f"오류 발생: {e}")
