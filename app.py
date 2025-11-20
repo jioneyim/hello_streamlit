@@ -5,16 +5,11 @@ import time
 DB_NAME = "madang.db"
 
 
-### -----------------------------
-### DuckDB 연결
-### -----------------------------
 def connect():
     return duckdb.connect(DB_NAME)
 
 
-### -----------------------------
-### CSV → DuckDB 자동 초기화
-### -----------------------------
+# CSV → DuckDB 초기화 (앱 시작 시 자동 실행됨)
 def init_db():
     conn = connect()
 
@@ -36,9 +31,7 @@ def init_db():
     conn.close()
 
 
-### -----------------------------
-### SQL 실행 (SELECT)
-### -----------------------------
+# SQL 실행 함수
 def run_query(sql, return_type="df"):
     conn = connect()
     result = conn.sql(sql)
@@ -51,30 +44,22 @@ def run_query(sql, return_type="df"):
     return result
 
 
-### -----------------------------
-### Streamlit 앱 시작
-### -----------------------------
+# ------------------------------------------------------
+# Streamlit App
+# ------------------------------------------------------
 st.title("📚 마당 DB (DuckDB 버전)")
 
-
-# 초기 버튼
-if st.button("CSV → DuckDB 초기화"):
-    try:
-        init_db()
-        st.success("DuckDB 초기화 완료 (CSV → 테이블 생성)!")
-    except Exception as e:
-        st.error(f"오류 발생: {e}")
+# ★★★ 앱 시작 시 DuckDB 초기화 ★★★
+init_db()
 
 
-# 탭 구성
 tab1, tab2 = st.tabs(["고객 조회", "거래 입력"])
 
 
-### ========================================
-### 1) 고객 조회
-### ========================================
+# --------------------------
+# 고객 조회
+# --------------------------
 name = tab1.text_input("고객명 입력")
-
 customer_id = None
 
 if name:
@@ -95,9 +80,9 @@ if name:
         tab2.write(f"📌 고객명: {name}")
 
 
-### ========================================
-### 2) 거래 입력
-### ========================================
+# --------------------------
+# 거래 입력
+# --------------------------
 if customer_id:
 
     books_df = run_query("SELECT bookid, bookname FROM Book", "df")
